@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 #include "Date.h"
 
 using namespace std;
@@ -18,6 +19,9 @@ struct Record
 	Record(const char* _groupCode, int _personalId, string _name, bool _isMale, 
 		string _educationForm, Date _birthdayDate, Date _entranceDate, int _EGEPoints);
 
+	bool operator > (const Record& record);
+
 	string toString();
+	string toFileString();
 };
 

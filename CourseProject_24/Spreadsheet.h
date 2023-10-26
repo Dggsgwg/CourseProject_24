@@ -11,11 +11,11 @@ public:
 
 	void display();
 	void addRecord(Record record);
-	void removeRecord();
-	void editRecord();
+	bool removeRecord(const char* groupCode);
+	bool editRecord(const char* groupCode, Record record);
 	void sort();
-	void seek(string param);
-	void saveToFile(string filename);
-	void readFromFile(string filename);
+	Node* seek(int personalId);
+	void saveToFile(string fileName);
+	void readFromFile(string fileName);
 };
 
