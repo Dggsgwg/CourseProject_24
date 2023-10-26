@@ -4,13 +4,15 @@ using namespace std;
 
 struct Date
 {
-	int year;
-	int month;
-	int day;
+	short year;
+	short month;
+	short day;
 
 	Date();
-	Date(int _year, int _month, int _day);
+	Date(short _year, short _month, short _day);
 
+	int compare(Date date);
 	string toString();
+	string toFileString();
 };
 
