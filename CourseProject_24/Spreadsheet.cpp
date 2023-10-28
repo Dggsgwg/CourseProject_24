@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Spreadsheet::Spreadsheet() 
+Spreadsheet::Spreadsheet()
 {
 	tableName = "";
 	list = NULL;
@@ -21,6 +21,19 @@ Spreadsheet::Spreadsheet(string _tableName, Node* _list)
 {
 	tableName = _tableName;
 	list = _list;
+}
+
+istream& operator >> (istream& in, Record& r)
+{
+	string isMale, firstName, middleName, lastName;
+	in >> r.groupCode >> r.personalId >> firstName >> middleName >> lastName >> isMale
+		>> r.educationForm >> r.birthdayDate.day >> r.birthdayDate.month
+		>> r.birthdayDate.year >> r.entranceDate.day >> r.entranceDate.month
+		>> r.entranceDate.year >> r.EGEPoints;
+	r.isMale = (strcmp(isMale.c_str(), "true") == 0) ? true : false;
+	r.name = format("{} {} {}", firstName, middleName, lastName);
+
+	return in;
 }
 
 void Spreadsheet::display()
@@ -52,29 +65,29 @@ void Spreadsheet::addRecord(Record record)
 	newElem = nullptr;
 }
 
-bool Spreadsheet::removeRecord(string groupCode)
+Record Spreadsheet::getRecordFromStream(istream& in)
+{
+	Record r;
+	in >> r;
+
+	return r;
+}
+
+bool Spreadsheet::removeRecord(int personalId)
 {
 	Node* head = list;
 
 	if (head != NULL)
 	{
-		if (strcmp(list->record.groupCode.c_str(), groupCode.c_str()) == 0)
+		if (list->record.personalId == personalId)
 		{
 			list = list->next;
 		}
 		while (head->next) {
-			if (strcmp(head->next->record.groupCode.c_str(), groupCode.c_str()) == 0)
+			if (head->next->record.personalId == personalId)
 			{
-				if (head->next->next != NULL)
-				{
-					head->next = head->next->next;
-					return true;
-				}
-				else
-				{
-					head->next = NULL;
-					return true;
-				}
+				head->next = head->next->next;
+				return true;
 			}
 			head = head->next;
 		}
@@ -83,14 +96,14 @@ bool Spreadsheet::removeRecord(string groupCode)
 	return false;
 }
 
-bool Spreadsheet::editRecord(string groupCode, Record record)
+bool Spreadsheet::editRecord(int personalId, Record record)
 {
 	Node* head = list;
 
 	if (head != NULL)
 	{
 		while (head) {
-			if (strcmp(head->record.groupCode.c_str(), groupCode.c_str()) == 0)
+			if (head->record.personalId == personalId)
 			{
 				head->record = record;
 
@@ -108,6 +121,7 @@ bool Spreadsheet::editRecord(string groupCode, Record record)
 
 void Spreadsheet::sort() //пузырьковая сортировка
 {
+	cout << "start" << endl;
 	Node* t, * m, * a, * b;
 	if (list == NULL) return;
 
@@ -134,7 +148,7 @@ void Spreadsheet::sort() //пузырьковая сортировка
 			b = b->next;
 		}
 	}
-
+	cout << "finish" << endl;
 	t = m = a = b = nullptr;
 }
 
@@ -188,26 +202,28 @@ void Spreadsheet::getFiveEldest(Node** array, bool isMale)
 		}
 		head = head->next;
 	}
+
+	head = nullptr;
 }
 
 void Spreadsheet::getFiveEldest()
 {
-	Node** males = new Node* [5] {};
-	Node** females = new Node* [5] {};
-	
+	Node** males = new Node * [5] {};
+	Node** females = new Node * [5] {};
+
 	getFiveEldest(males, true);
 	getFiveEldest(females, false);
 
-	for (int i = 0; i < 5; i++) 
+	for (int i = 0; i < 5; i++)
 	{
 		if (males[i])
-		cout << "m - " << males[i]->toString() << endl;
+			cout << "М - " << males[i]->toString() << endl;
 	}
 	cout << endl << endl;
 	for (int i = 0; i < 5; i++)
 	{
-		if(females[i])
-		cout << "f - " << females[i]->toString() << endl;
+		if (females[i])
+			cout << "Ж - " << females[i]->toString() << endl;
 	}
 
 }
@@ -227,21 +243,7 @@ void Spreadsheet::saveToFile(string fileName)
 		}
 	}
 
-	delete head;
 	head = nullptr;
-}
-
-istream& operator >> (istream& in, Record& r)
-{
-	string isMale, firstName, middleName, lastName;
-	in >> r.groupCode >> r.personalId >> firstName >> middleName >> lastName >> isMale 
-		>> r.educationForm >> r.birthdayDate.day >> r.birthdayDate.month 
-		>> r.birthdayDate.year >> r.entranceDate.day >> r.entranceDate.month 
-		>> r.entranceDate.year >> r.EGEPoints;
-	r.isMale = (strcmp(isMale.c_str(), "true") == 0) ? true : false;
-	r.name = format("{} {} {}", firstName, middleName, lastName);
-
-	return in;
 }
 
 void Spreadsheet::readFromFile(string fileName)
@@ -249,7 +251,6 @@ void Spreadsheet::readFromFile(string fileName)
 	ifstream in(format("{}.sheet", fileName));
 	Record r = Record();
 
-	//cout << r.toString();
 	if (in.is_open())
 	{
 		while (in >> r)

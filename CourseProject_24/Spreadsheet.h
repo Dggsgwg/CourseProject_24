@@ -12,8 +12,9 @@ public:
 
 	void display();
 	void addRecord(Record record);
-	bool removeRecord(string groupCode);
-	bool editRecord(string groupCode, Record record);
+	Record getRecordFromStream(istream& in);
+	bool removeRecord(int personalId);
+	bool editRecord(int personalId, Record record);
 	void sort();
 	Node* seek(int personalId);
 	void getFiveEldest();

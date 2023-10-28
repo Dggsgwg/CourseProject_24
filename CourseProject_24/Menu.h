@@ -1,15 +1,14 @@
-//#include "Spreadsheet.h"
+#include "Spreadsheet.h"
 
 class Menu
 {
-	//Spreadsheet s;
+	Spreadsheet s;
 
 public:
-	/*Menu();
-	void init();
+	Menu();
+	void start();
 	void loadFromFile();
 	void saveToFile();
 	void operateWithTable();
-	void exit();*/
 };
 

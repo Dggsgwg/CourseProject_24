@@ -36,7 +36,7 @@ Record::Record(string _groupCode, int _personalId, string _name, bool _isMale,
 
 bool Record::operator>(const Record& record) 
 {
-	return strcmp(groupCode.c_str(), record.groupCode.c_str()) >= 0;
+	return strcmp(groupCode.c_str(), record.groupCode.c_str()) > 0;
 }
 
 string Record::toString() 

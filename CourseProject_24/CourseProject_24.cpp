@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 #include <format>
-#include "Spreadsheet.h"
+#include <Windows.h>
 #include "Menu.h"
 
 
@@ -9,6 +9,7 @@ using namespace std;
 int main()
 {
     setlocale(LC_ALL, "RUS");
+    SetConsoleCP(1251);
 
     Record r = Record("ИТ22-2",1,format("Ф И О1"), false, format("очная"), Date(2001,1,1), Date(2021, 1, 1), 250);
     Record r2 = Record("ИТ22-3", 2, format("Ф И О2"), true, format("очная"), Date(2002, 1, 1), Date(2021, 1, 1), 250);
@@ -42,6 +43,6 @@ int main()
     //s.getFiveEldest();
     //s.display();
 
-    //Menu m = Menu();
-    //m.init();
+    Menu m = Menu();
+    m.start();
 }
