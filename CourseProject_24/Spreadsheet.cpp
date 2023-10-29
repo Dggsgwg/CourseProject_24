@@ -36,9 +36,18 @@ istream& operator >> (istream& in, Record& r)
 	return in;
 }
 
+void Spreadsheet::printHeader() 
+{
+	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl
+		<< "| Шифр группы | Номер зач. |         ФИО         |   Пол   | Форма обуч. | Дата рожд. | Дата поступления | Баллы ЕГЭ |" << endl
+		<< "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+}
+
 void Spreadsheet::display()
 {
 	cout << "Таблица: " << tableName << endl;
+	printHeader();
+
 	Node* showList = list;
 
 	if (list != NULL)
@@ -47,6 +56,7 @@ void Spreadsheet::display()
 			cout << showList->toString() << endl;
 			showList = showList->next;
 		} while (showList != NULL);
+		cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
 	}
 	else
 	{
@@ -69,7 +79,7 @@ Record Spreadsheet::getRecordFromStream(istream& in)
 {
 	Record r;
 	in >> r;
-
+	
 	return r;
 }
 
@@ -82,6 +92,7 @@ bool Spreadsheet::removeRecord(int personalId)
 		if (list->record.personalId == personalId)
 		{
 			list = list->next;
+			return true;
 		}
 		while (head->next) {
 			if (head->next->record.personalId == personalId)
@@ -121,7 +132,6 @@ bool Spreadsheet::editRecord(int personalId, Record record)
 
 void Spreadsheet::sort() //пузырьковая сортировка
 {
-	cout << "start" << endl;
 	Node* t, * m, * a, * b;
 	if (list == NULL) return;
 
@@ -148,7 +158,7 @@ void Spreadsheet::sort() //пузырьковая сортировка
 			b = b->next;
 		}
 	}
-	cout << "finish" << endl;
+
 	t = m = a = b = nullptr;
 }
 
@@ -173,31 +183,26 @@ void Spreadsheet::getFiveEldest(Node** array, bool isMale)
 {
 	Node* head = list;
 	int count = 0;
-	Date minDate = Date(3000, 1, 1);
 
 	while (head)
 	{
 		if (head->record.isMale == isMale) {
-			if (head->record.birthdayDate.compare(minDate) < 0)
-			{
-				if (count <= 4) {
-					array[count] = head;
-					count++;
-				}
-				else {
-					Date maxArrDate = Date(1, 1, 1);
-					int index;
-					for (int i = 0; i < 5; i++)
+			if (count < 5) {
+				array[count] = head;
+				count++;
+			}
+			else {
+				Date maxArrDate = Date(1, 1, 1);
+				int index;
+				for (int i = 0; i < 5; i++)
+				{
+					if (array[i]->record.birthdayDate.compare(maxArrDate) > 0)
 					{
-						if (array[i]->record.birthdayDate.compare(maxArrDate) > 0)
-						{
-							maxArrDate = array[i]->record.birthdayDate;
-							index = i;
-						}
+						maxArrDate = array[i]->record.birthdayDate;
+						index = i;
 					}
-					array[index] = head;
 				}
-				minDate = head->record.birthdayDate;
+				array[index] = head;
 			}
 		}
 		head = head->next;
@@ -214,18 +219,27 @@ void Spreadsheet::getFiveEldest()
 	getFiveEldest(males, true);
 	getFiveEldest(females, false);
 
+	cout << "Cтаршие юноши:" << endl;
+	printHeader();
+
 	for (int i = 0; i < 5; i++)
 	{
 		if (males[i])
-			cout << "М - " << males[i]->toString() << endl;
+			cout << males[i]->toString() << endl;
 	}
-	cout << endl << endl;
+	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+
+	cout << endl << "Cтаршие девушки:" << endl;
+	printHeader();
 	for (int i = 0; i < 5; i++)
 	{
 		if (females[i])
-			cout << "Ж - " << females[i]->toString() << endl;
+			cout << females[i]->toString() << endl;
 	}
+	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
 
+	delete males, females;
+	males = females = nullptr;
 }
 
 void Spreadsheet::saveToFile(string fileName)
@@ -248,6 +262,7 @@ void Spreadsheet::saveToFile(string fileName)
 
 void Spreadsheet::readFromFile(string fileName)
 {
+	tableName = fileName;
 	ifstream in(format("{}.sheet", fileName));
 	Record r = Record();
 

@@ -10,5 +10,6 @@ public:
 	void loadFromFile();
 	void saveToFile();
 	void operateWithTable();
+	int getCommand(int count);
 };
 

@@ -41,7 +41,7 @@ bool Record::operator>(const Record& record)
 
 string Record::toString() 
 {
-	return format("{}, {}, {}, {}, {}, {}, {}, {}", 
+	return format("|   {:<9} | {:<10} | {:<19} | {:<7} |   {:<9} | {:<10} |    {:<13} |    {:<6} |", 
 		groupCode, personalId, name, isMale ? "мужской" : "женский",
 		educationForm, birthdayDate.toString(),
 		entranceDate.toString(), EGEPoints);

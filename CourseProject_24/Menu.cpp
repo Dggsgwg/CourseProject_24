@@ -1,9 +1,11 @@
+#pragma warning(disable : 4996)
 #include "Menu.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <format>
 
-Menu::Menu() 
+
+Menu::Menu()
 {
 	Record r = Record("ИТ22-2", 1, format("Ф И О1"), false, format("очная"), Date(2001, 1, 1), Date(2021, 1, 1), 250);
 	Record r2 = Record("ИТ22-3", 2, format("Ф И О2"), true, format("очная"), Date(2002, 1, 1), Date(2021, 1, 1), 250);
@@ -24,43 +26,69 @@ Menu::Menu()
 	s.addRecord(r8);*/
 }
 
-void Menu::start() 
+void printMenu(int num) 
 {
-	int command;
-	string tableName;
-
-	cout << "Список команд:" << endl
-		<< "1 - Создание новой таблицы" << endl
-		<< "2 - Загрузка таблицы из файла" << endl
-		<< "3 - Сохранение текущей таблицы в файл" << endl
-		<< "0 - Выход из программы" << endl;
-
-	cin >> command;
-
-	switch (command) 
+	switch (num) 
 	{
-	case 1 :
-		cout << "Введите название таблицы:" << endl;
-		cin >> tableName;
-
-		s = Spreadsheet(tableName);
-		operateWithTable();
+	case 1:
+		cout << "Список команд:" << endl
+			<< "1 - Создание новой таблицы" << endl
+			<< "2 - Загрузка таблицы из файла" << endl
+			<< "3 - Сохранение текущей таблицы в файл" << endl
+			<< "0 - Выход из программы" << endl;
 		break;
 	case 2:
-		loadFromFile();
-		operateWithTable();
+		cout << "Список команд:" << endl
+			<< "1 - Продолжить работу с таблицей" << endl
+			<< "0 - Выход из программы" << endl;
 		break;
 	case 3:
-		saveToFile();
-		break;
-	default: 
-		cout << endl << endl;
-		start();
+		cout << "Список команд:" << endl
+			<< "1 - Просмотр таблицы" << endl
+			<< "2 - Добавить запись" << endl
+			<< "3 - Удалить запись" << endl
+			<< "4 - Изменить запись" << endl
+			<< "5 - Сортировать таблицу" << endl
+			<< "6 - Найти запись" << endl
+			<< "7 - Получить 5 старших юношей и девушек" << endl
+			<< "0 - Вернуться в главное меню" << endl;
 		break;
 	}
 }
 
-void Menu::loadFromFile() 
+void Menu::start()
+{
+	int command;
+	string tableName;
+
+	do
+	{
+		system("cls");
+
+		printMenu(1);
+
+		command = getCommand(3);
+
+		switch (command)
+		{
+		case 1:
+			cout << "Введите название таблицы:" << endl;
+			cin >> tableName;
+
+			s = Spreadsheet(tableName);
+			operateWithTable();
+			break;
+		case 2:
+			loadFromFile();
+			break;
+		case 3:
+			saveToFile();
+			break;
+		}
+	} while (command != 0);
+}
+
+void Menu::loadFromFile()
 {
 	string fileName;
 
@@ -71,120 +99,122 @@ void Menu::loadFromFile()
 	operateWithTable();
 }
 
-void Menu::saveToFile() 
+void Menu::saveToFile()
 {
-	cin;
-
 	string fileName;
 	int command;
-	
+
 	cout << "Введите имя файла для сохранения" << endl;
 	cin >> fileName;
 
 	s.saveToFile(fileName);
 
-	cout << "Список команд:" << endl
-		<< "1 - Продолжить работу с таблицей" << endl
-		<< "0 - Выход из программы" << endl;
-	cin >> command;
-
-	switch (command) 
+	do
 	{
-	case 1:
-		operateWithTable();
-		break;
-	case 0:
-		return;
-	default:
-		saveToFile();
-		break;
-	}
+		system("cls");
+		printMenu(2);
+
+		command = getCommand(1);
+
+		switch (command)
+		{
+		case 1:
+			operateWithTable();
+			break;
+		}
+	} while (command != 0);
+	exit(0);
 }
 
-void Menu::operateWithTable() 
+void Menu::operateWithTable()
 {
-	cin;
-
 	int command, numLine;
 	string line;
 	Node* n = NULL;
 
-	cout << "Список команд:" << endl
-		<< "1 - Просмотр таблицы" << endl
-		<< "2 - Добавить запись" << endl
-		<< "3 - Удалить запись" << endl
-		<< "4 - Изменить запись" << endl
-		<< "5 - Сортировать таблицу" << endl
-		<< "6 - Найти запись" << endl
-		<< "7 - Получить 5 старших юношей и девушек" << endl
-		<< "0 - Вернуться в главное меню" << endl;
-
-	cin >> command;
-
-	switch (command) 
+	do
 	{
-	case 1:
-		s.display();
-		operateWithTable();
-		break;
-	case 2:
-		cout << "Введите данные записи в формате:" << endl
-			<< "Шифр_группы_6_символов Фамилия Имя Отчество Параметр пол(true - мужской, false - женский)"
-			<< "Форма_обучения(очная/заочная) день месяц год(рождения) день месяц год(поступления) балл_ЕГЭ" << endl;
+		system("cls");
 
-		s.addRecord(s.getRecordFromStream(cin));
-		s.display();
-		operateWithTable();
-		break;
-	case 3:
-		cout << "Введите номер зачетки для удаления записи:" << endl;
-		cin >> numLine;
-		s.removeRecord(numLine);
-		s.display();
-		operateWithTable();
-		break;
-	case 4:
-		cout << "Введите номер зачетки для изменения записи:" << endl;
-		cin >> numLine;
-		cout << "Введите данные записи в формате:" << endl
-			<< "Шифр_группы_6_символов Фамилия Имя Отчество Параметр пол(true - мужской, false - женский)"
-			<< "Форма_обучения(очная/заочная) день месяц год(рождения) день месяц год(поступления) балл_ЕГЭ" << endl;
-		s.editRecord(numLine, s.getRecordFromStream(cin));
-		s.display();
-		operateWithTable();
-		break;
-	case 5:
-		s.sort();
-		s.display();
-		operateWithTable();
-		break;
-	case 6:
-		cout << "Введите код зачетки для поиска записи:" << endl;
-		cin >> numLine;
-		n = s.seek(numLine);
-		if (n != NULL) 
+		printMenu(3);
+
+		command = getCommand(7);
+
+		switch (command)
 		{
-			cout << "Искомая запись:" << endl 
-				<< n->toString() << endl;
+		case 1:
+			s.display();
+			break;
+		case 2:
+			cout << "Введите данные записи в формате:" << endl
+				<< "Шифр_группы_6_символов Фамилия Имя Отчество Параметр пол(true - мужской, false - женский)"
+				<< "Форма_обучения(очная/заочная) день месяц год(рождения) день месяц год(поступления) балл_ЕГЭ" << endl;
+
+			s.addRecord(s.getRecordFromStream(cin));
+			s.display();
+			break;
+		case 3:
+			cout << "Введите номер зачетки для удаления записи:" << endl;
+			cin >> numLine;
+			s.removeRecord(numLine);
+			s.display();
+			break;
+		case 4:
+			cout << "Введите номер зачетки для изменения записи:" << endl;
+			cin >> numLine;
+			cout << "Введите новые данные записи в формате:" << endl
+				<< "Шифр_группы_6_символов Фамилия Имя Отчество Параметр пол(true - мужской, false - женский)"
+				<< "Форма_обучения(очная/заочная) день месяц год(рождения) день месяц год(поступления) балл_ЕГЭ" << endl;
+			s.editRecord(numLine, s.getRecordFromStream(cin));
+			s.display();
+			break;
+		case 5:
+			s.sort();
+			s.display();
+			break;
+		case 6:
+			cout << "Введите номер зачетки для поиска записи:" << endl;
+			cin >> numLine;
+			n = s.seek(numLine);
+			if (n != NULL)
+			{
+				cout << "Искомая запись:" << endl
+					<< n->toString() << endl;
+			}
+			else
+			{
+				cout << "Запись не найдена" << endl;
+			}
+			break;
+		case 7:
+			s.getFiveEldest();
+			break;
 		}
-		else 
+		if (command != 0)
 		{
-			cout << "Запись не найдена" << endl;
+			system("pause");
 		}
-		operateWithTable();
-		break;
-	case 7:
-		s.getFiveEldest();
-		operateWithTable();
-		break;
-	case 0:
-		start();
-		break;
-	default:
-		operateWithTable();
-		break;
-	}
+	} while (command != 0);
 
 	delete n;
 	n = nullptr;
+}
+
+int Menu::getCommand(int count)
+{
+	int variant;
+	string s; // строка для считывания введённых данных
+	getline(cin, s); // считываем строку
+	while (s.empty()) 
+	{
+		getline(cin, s);
+	}
+
+	// пока ввод некорректен, сообщаем об этом и просим повторить его
+	while (sscanf(s.c_str(), "%d", &variant) != 1 || variant < 0 || variant > count) {
+		cout << "Неправильный код: " << endl; // выводим сообщение об ошибке
+		getline(cin, s); // считываем строку повторно
+	}
+
+	return variant;
 }

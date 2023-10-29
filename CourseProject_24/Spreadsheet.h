@@ -23,5 +23,6 @@ public:
 
 private:
 	void getFiveEldest(Node** array, bool isMale);
+	void printHeader();
 };
 

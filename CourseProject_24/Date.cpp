@@ -28,7 +28,7 @@ int Date::compare(Date date)
 
 string Date::toString() 
 {
-	return format("{}.{}.{}", day, month, year);
+	return format("{:02}.{:02}.{}", day, month, year);
 }
 
 string Date::toFileString() 
