@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <format>
+#include <conio.h>
+#include <Windows.h>
+#include <dos.h>
 #include "Spreadsheet.h"
 
 using namespace std;
@@ -43,6 +46,93 @@ void Spreadsheet::printHeader()
 		<< "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
 }
 
+void cursor(int size) {
+	bool exit = false;
+	int ch;
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD position = { 1, 14 };
+	SetConsoleCursorPosition(hConsole, position);
+
+	while (true) {
+		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 120, 0);
+	}
+
+	while (!exit)
+	{
+		ch = _getch();
+		switch (ch)
+		{
+		case 224:
+		{
+			switch (_getch())
+			{
+			case 72:
+			{// нажата клавиша вверх
+				if (position.Y)
+				{
+					position.Y--;
+					SetConsoleCursorPosition(hConsole, position);
+					cout << (char)16;
+					SetConsoleCursorPosition(hConsole, position);
+				}
+				else 
+				{
+					
+					HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+					COORD pos = { position.X, 0 };
+					SetConsoleCursorPosition(hConsole, pos);
+				}
+				break;
+			}
+			case 80:
+			{// нажата клавиша вниз
+				if (position.Y < size)
+				{
+					position.Y++;
+					SetConsoleCursorPosition(hConsole, position);
+					cout << (char)16;
+					SetConsoleCursorPosition(hConsole, position);
+				}
+				break;
+			}
+			case 75:
+			{// нажата клавиша влево
+				if (position.X)
+				{
+					position.X--;
+					SetConsoleCursorPosition(hConsole, position);
+					cout << (char)16;
+					SetConsoleCursorPosition(hConsole, position);
+				}
+				break;
+			}
+			case 77:
+			{// нажата клавиша вправо
+				if (position.X < 119)
+				{
+					position.X++;
+					SetConsoleCursorPosition(hConsole, position);
+					cout << (char)16;
+					SetConsoleCursorPosition(hConsole, position);
+				}
+				break;
+			}
+			default:
+				break;
+			}
+			break;
+		}
+		case 27:
+		{
+			exit = true;
+			break;
+		}
+		default:
+			break;
+		}
+	}
+}
+
 void Spreadsheet::display()
 {
 	cout << "“аблица: " << tableName << endl;
@@ -62,6 +152,8 @@ void Spreadsheet::display()
 	{
 		cout << "“аблица пуста." << endl;
 	}
+
+	cursor(40);
 
 	delete showList;
 	showList = nullptr;
@@ -245,7 +337,7 @@ void Spreadsheet::getFiveEldest()
 void Spreadsheet::saveToFile(string fileName)
 {
 	ofstream out;
-	out.open(format("{}.sheet", fileName));
+	out.open(format("{}.bin", fileName));
 	Node* head = list;
 
 	if (out.is_open())
