@@ -24,5 +24,7 @@ public:
 private:
 	void getFiveEldest(Node** array, bool isMale);
 	void printHeader();
+	void printBottom();
+	bool displayPage(Node* showList, int rows, int page);
 };
 

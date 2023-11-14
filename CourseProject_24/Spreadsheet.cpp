@@ -46,6 +46,11 @@ void Spreadsheet::printHeader()
 		<< "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
 }
 
+void Spreadsheet::printBottom() 
+{
+	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+}
+
 void cursor(int size) {
 	bool exit = false;
 	int ch;
@@ -135,28 +140,90 @@ void cursor(int size) {
 
 void Spreadsheet::display()
 {
-	cout << "Таблица: " << tableName << endl;
-	printHeader();
-
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(hConsole, &csbi);
+	int rows = csbi.srWindow.Bottom - csbi.srWindow.Top - 5;
 	Node* showList = list;
+	int currentPage = 0;
+	int ch;
+	bool exit = false;
+	bool forward = true;
 
-	if (list != NULL)
+	system("cls");
+	displayPage(showList, rows, 0);
+
+	while (!exit)
 	{
-		do {
-			cout << showList->toString() << endl;
-			showList = showList->next;
-		} while (showList != NULL);
-		cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
-	}
-	else
-	{
-		cout << "Таблица пуста." << endl;
+		ch = _getch();
+		switch (ch)
+		{
+		case 224:
+		{
+			switch (_getch())
+			{
+			case 75:
+			{// нажата клавиша влево
+				if (currentPage > 0)
+				{
+					system("cls");
+					showList = list;
+					currentPage--;
+					forward = displayPage(showList, rows, currentPage);
+				}
+				break;
+			}
+			case 77:
+			{// нажата клавиша вправо
+				if (forward)
+				{
+					system("cls");
+					showList = list;
+					currentPage++;
+					forward = displayPage(showList, rows, currentPage);
+				}
+				break;
+			}
+			default:
+				break;
+			}
+			break;
+		}
+		case 27:
+		{
+			exit = true;
+			break;
+		}
+		default:
+			break;
+		}
 	}
 
-	cursor(40);
-
-	delete showList;
 	showList = nullptr;
+}
+
+bool Spreadsheet::displayPage(Node* showList, int rows, int page) {
+	for (int i = 0; i < rows * page; i++) 
+	{
+		if (showList == NULL) return false;
+		else showList = showList -> next;
+	}
+
+	if (showList != NULL) {
+		cout << "Таблица: " << tableName << ", Страница - " << page + 1 << endl;
+		printHeader();
+		while (showList) {
+			if (rows <= 0) break;
+			cout << showList->toString() << endl;
+			showList = showList -> next;
+			rows--;
+		}
+		printBottom();
+		cout << "Нажмите ESC для завершения просмотра";
+		if (rows > 0 || showList == NULL) return false;
+	}
+
+	return true;
 }
 
 void Spreadsheet::addRecord(Record record)
@@ -319,7 +386,7 @@ void Spreadsheet::getFiveEldest()
 		if (males[i])
 			cout << males[i]->toString() << endl;
 	}
-	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+	printBottom();
 
 	cout << endl << "Cтаршие девушки:" << endl;
 	printHeader();
@@ -328,7 +395,7 @@ void Spreadsheet::getFiveEldest()
 		if (females[i])
 			cout << females[i]->toString() << endl;
 	}
-	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+	printBottom();
 
 	delete males, females;
 	males = females = nullptr;
@@ -337,7 +404,7 @@ void Spreadsheet::getFiveEldest()
 void Spreadsheet::saveToFile(string fileName)
 {
 	ofstream out;
-	out.open(format("{}.bin", fileName));
+	out.open(format("{}.sheet", fileName));
 	Node* head = list;
 
 	if (out.is_open())

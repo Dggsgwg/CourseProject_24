@@ -131,6 +131,7 @@ void Menu::operateWithTable()
 	int command, numLine;
 	string line;
 	Node* n = NULL;
+	bool pause = false;
 
 	do
 	{
@@ -165,7 +166,7 @@ void Menu::operateWithTable()
 				<< "ИТ22-6 123456 Балабанов В Е true очная 1 1 2008 1 1 2021 250" << endl;
 			s.editRecord(numLine, s.getRecordFromStream(cin));
 			s.display();
-			break;	
+			break;
 		case 5:
 			s.sort();
 			s.display();
@@ -183,15 +184,20 @@ void Menu::operateWithTable()
 			{
 				cout << "Запись не найдена" << endl;
 			}
+			pause = true;
 			break;
 		case 7:
 			s.getFiveEldest();
+			pause = true;
 			break;
 		}
-		if (command != 0)
+		if (pause)
 		{
-			system("pause");
-		}
+			if (command != 0)
+			{
+				system("pause");
+			}
+		} else pause = false;
 	} while (command != 0);
 
 	delete n;
