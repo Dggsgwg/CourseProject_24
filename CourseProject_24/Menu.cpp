@@ -3,27 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <format>
+#include <conio.h>
 
 
 Menu::Menu()
 {
-	Record r = Record("ИТ22-2", 1, format("Ф И О1"), false, format("очная"), Date(2001, 1, 1), Date(2021, 1, 1), 250);
-	Record r2 = Record("ИТ22-3", 2, format("Ф И О2"), true, format("очная"), Date(2002, 1, 1), Date(2021, 1, 1), 250);
-	Record r3 = Record("ИТ22-4", 3, format("Ф И О3"), false, format("очная"), Date(2003, 1, 1), Date(2021, 1, 1), 250);
-	Record r4 = Record("ИТ22-5", 4, format("Ф И О4"), true, format("очная"), Date(2004, 1, 1), Date(2021, 1, 1), 250);
-	Record r5 = Record("ИТ22-6", 5, format("Ф И О5"), true, format("очная"), Date(2005, 1, 1), Date(2021, 1, 1), 250);
-	Record r6 = Record("ИТ22-6", 6, format("Ф И О5"), true, format("очная"), Date(2006, 1, 1), Date(2021, 1, 1), 250);
-	Record r7 = Record("ИТ22-6", 7, format("Ф И О5"), false, format("очная"), Date(2007, 1, 1), Date(2021, 1, 1), 250);
-	Record r8 = Record("ИТ22-6", 8, format("Ф И О5"), true, format("очная"), Date(2008, 1, 1), Date(2021, 1, 1), 250);
 	s = Spreadsheet();
-	/*s.addRecord(r);
-	s.addRecord(r2);
-	s.addRecord(r3);
-	s.addRecord(r4);
-	s.addRecord(r5);
-	s.addRecord(r6);
-	s.addRecord(r7);
-	s.addRecord(r8);*/
 }
 
 void printMenu(int num) 
@@ -52,6 +37,11 @@ void printMenu(int num)
 			<< "6 - Найти запись" << endl
 			<< "7 - Получить 5 старших юношей и девушек" << endl
 			<< "0 - Вернуться в главное меню" << endl;
+		break;
+	case 4:
+		cout << "Введите данные записи в формате:" << endl
+			<< "Номер группы, номер зач., Ф И О, пол(true = М), форм обуч, ДД.ММ.ГГ(рождения), ДД.ММ.ГГ(поступления), ЕГЭ" << endl
+			<< "Пример: ИТ22-6 123456 Балабанов В Е true очная 1 1 2008 1 1 2021 250" << endl;
 		break;
 	}
 }
@@ -82,10 +72,27 @@ void Menu::start()
 			loadFromFile();
 			break;
 		case 3:
-			saveToFile();
+			saveToFile(false);
 			break;
+		case 0:
+			while (command != -1) {
+				cout << "Сохранить таблицу в файл? (y/n)" << endl;
+				char ch = _getch();
+				switch (ch)
+				{
+				case 'y':
+					saveToFile(true);
+					command = -1;
+					break;
+				case 'n':
+					command = -1;
+					break;
+				default:
+					break;
+				}
+			}
 		}
-	} while (command != 0);
+	} while (command != -1);
 }
 
 void Menu::loadFromFile()
@@ -99,7 +106,7 @@ void Menu::loadFromFile()
 	operateWithTable();
 }
 
-void Menu::saveToFile()
+void Menu::saveToFile(bool leave)
 {
 	string fileName;
 	int command;
@@ -109,20 +116,22 @@ void Menu::saveToFile()
 
 	s.saveToFile(fileName);
 
-	do
-	{
-		system("cls");
-		printMenu(2);
-
-		command = getCommand(1);
-
-		switch (command)
+	if (!leave) {
+		do
 		{
-		case 1:
-			operateWithTable();
-			break;
-		}
-	} while (command != 0);
+			system("cls");
+			printMenu(2);
+
+			command = getCommand(1);
+
+			switch (command)
+			{
+			case 1:
+				operateWithTable();
+				break;
+			}
+		} while (command != 0);
+	}
 	exit(0);
 }
 
@@ -147,8 +156,7 @@ void Menu::operateWithTable()
 			s.display();
 			break;
 		case 2:
-			cout << "Введите данные записи в формате:" << endl
-				<< "ИТ22-6 123456 Балабанов В Е true очная 1 1 2008 1 1 2021 250" << endl;
+			printMenu(4);
 
 			s.addRecord(s.getRecordFromStream(cin));
 			s.display();
@@ -162,8 +170,7 @@ void Menu::operateWithTable()
 		case 4:
 			cout << "Введите номер зачетки для изменения записи:" << endl;
 			cin >> numLine;
-			cout << "Введите новые данные записи в формате:" << endl
-				<< "ИТ22-6 123456 Балабанов В Е true очная 1 1 2008 1 1 2021 250" << endl;
+			printMenu(4);
 			s.editRecord(numLine, s.getRecordFromStream(cin));
 			s.display();
 			break;
@@ -178,7 +185,7 @@ void Menu::operateWithTable()
 			if (n != NULL)
 			{
 				cout << "Искомая запись:" << endl
-					<< n->toString() << endl;
+					<< s.nodeToString(n) << endl;
 			}
 			else
 			{
@@ -197,7 +204,8 @@ void Menu::operateWithTable()
 			{
 				system("pause");
 			}
-		} else pause = false;
+			pause = false;
+		}
 	} while (command != 0);
 
 	delete n;

@@ -41,14 +41,14 @@ istream& operator >> (istream& in, Record& r)
 
 void Spreadsheet::printHeader() 
 {
-	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl
-		<< "| Шифр группы | Номер зач. |         ФИО         |   Пол   | Форма обуч. | Дата рожд. | Дата поступления | Баллы ЕГЭ |" << endl
-		<< "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+	cout << "+-------------+------------+---------------------+-----+-------------+------------+------------------+-----------+" << endl
+		 << "| Шифр группы | Номер зач. |         ФИО         | Пол | Форма обуч. | Дата рожд. | Дата поступления | Баллы ЕГЭ |" << endl
+	   	 << "+-------------+------------+---------------------+-----+-------------+------------+------------------+-----------+" << endl;
 }
 
 void Spreadsheet::printBottom() 
 {
-	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
+	cout << "+-------------+------------+---------------------+-----+-------------+------------+------------------+-----------+" << endl;
 }
 
 int Spreadsheet::compareDate(Date date, Date date2) 
@@ -79,7 +79,7 @@ bool operator > (const Record& record, const Record& record2)
 
 string Spreadsheet::recordToString(Record record) 
 {
-	return format("|   {:<9} | {:<10} | {:<19} | {:<7} |   {:<9} | {:<10} |    {:<13} |    {:<6} |",
+	return format("|   {:<9} | {:<10} | {:<19} |  {:<1}  |   {:<9} | {:<10} |    {:<13} |    {:<6} |",
 		record.groupCode, record.personalId, record.name, record.isMale ? "М" : "Ж",
 		record.educationForm, dateToString(record.birthdayDate),
 		dateToString(record.entranceDate), record.EGEPoints);
@@ -101,93 +101,6 @@ string Spreadsheet::nodeToString(Node* node)
 string Spreadsheet::nodeToFileString(Node* node)
 {
 	return recordToFileString(node->record);
-}
-
-void cursor(int size) {
-	bool exit = false;
-	int ch;
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD position = { 1, 14 };
-	SetConsoleCursorPosition(hConsole, position);
-
-	while (true) {
-		mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 120, 0);
-	}
-
-	while (!exit)
-	{
-		ch = _getch();
-		switch (ch)
-		{
-		case 224:
-		{
-			switch (_getch())
-			{
-			case 72:
-			{// нажата клавиша вверх
-				if (position.Y)
-				{
-					position.Y--;
-					SetConsoleCursorPosition(hConsole, position);
-					cout << (char)16;
-					SetConsoleCursorPosition(hConsole, position);
-				}
-				else 
-				{
-					
-					HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-					COORD pos = { position.X, 0 };
-					SetConsoleCursorPosition(hConsole, pos);
-				}
-				break;
-			}
-			case 80:
-			{// нажата клавиша вниз
-				if (position.Y < size)
-				{
-					position.Y++;
-					SetConsoleCursorPosition(hConsole, position);
-					cout << (char)16;
-					SetConsoleCursorPosition(hConsole, position);
-				}
-				break;
-			}
-			case 75:
-			{// нажата клавиша влево
-				if (position.X)
-				{
-					position.X--;
-					SetConsoleCursorPosition(hConsole, position);
-					cout << (char)16;
-					SetConsoleCursorPosition(hConsole, position);
-				}
-				break;
-			}
-			case 77:
-			{// нажата клавиша вправо
-				if (position.X < 119)
-				{
-					position.X++;
-					SetConsoleCursorPosition(hConsole, position);
-					cout << (char)16;
-					SetConsoleCursorPosition(hConsole, position);
-				}
-				break;
-			}
-			default:
-				break;
-			}
-			break;
-		}
-		case 27:
-		{
-			exit = true;
-			break;
-		}
-		default:
-			break;
-		}
-	}
 }
 
 void Spreadsheet::display()
@@ -255,6 +168,12 @@ void Spreadsheet::display()
 }
 
 bool Spreadsheet::displayPage(Node* showList, int rows, int page) {
+	if (showList == NULL) {
+		cout << "Таблица пуста" << endl;
+		cout << "Нажмите ESC для завершения просмотра";
+		return false;
+	}
+
 	for (int i = 0; i < rows * page; i++) 
 	{
 		if (showList == NULL) return false;
@@ -266,7 +185,7 @@ bool Spreadsheet::displayPage(Node* showList, int rows, int page) {
 		printHeader();
 		while (showList) {
 			if (rows <= 0) break;
-			cout << showList->toString() << endl;
+			cout << nodeToString(showList) << endl;
 			showList = showList -> next;
 			rows--;
 		}
@@ -407,13 +326,16 @@ void Spreadsheet::getFiveEldest(Node** array, bool isMale)
 				int index;
 				for (int i = 0; i < 5; i++)
 				{
-					if (array[i]->record.birthdayDate.compare(maxArrDate) > 0)
+					if (compareDate(array[i]->record.birthdayDate, maxArrDate) > 0)
 					{
 						maxArrDate = array[i]->record.birthdayDate;
 						index = i;
 					}
 				}
-				array[index] = head;
+				if (compareDate(head->record.birthdayDate, array[index]->record.birthdayDate) < 0)
+				{
+					array[index] = head;
+				}
 			}
 		}
 		head = head->next;
@@ -436,7 +358,7 @@ void Spreadsheet::getFiveEldest()
 	for (int i = 0; i < 5; i++)
 	{
 		if (males[i])
-			cout << males[i]->toString() << endl;
+			cout << nodeToString(males[i]) << endl;
 	}
 	printBottom();
 
@@ -445,7 +367,7 @@ void Spreadsheet::getFiveEldest()
 	for (int i = 0; i < 5; i++)
 	{
 		if (females[i])
-			cout << females[i]->toString() << endl;
+			cout << nodeToString(females[i]) << endl;
 	}
 	printBottom();
 
@@ -456,14 +378,14 @@ void Spreadsheet::getFiveEldest()
 void Spreadsheet::saveToFile(string fileName)
 {
 	ofstream out;
-	out.open(format("{}.sheet", fileName));
+	out.open(format("{}.bin", fileName));
 	Node* head = list;
 
 	if (out.is_open())
 	{
 		while (head)
 		{
-			out << head->toFileString() << endl;
+			out << nodeToFileString(head) << endl;
 			head = head->next;
 		}
 	}
@@ -474,7 +396,7 @@ void Spreadsheet::saveToFile(string fileName)
 void Spreadsheet::readFromFile(string fileName)
 {
 	tableName = fileName;
-	ifstream in(format("{}.sheet", fileName));
+	ifstream in(format("{}.bin", fileName));
 	Record r = Record();
 
 	if (in.is_open())

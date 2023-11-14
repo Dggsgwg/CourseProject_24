@@ -18,22 +18,10 @@
     <ClCompile Include="CourseProject_24.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Node.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Record.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Date.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="Spreadsheet.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="Menu.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="NodeUseCase.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,9 +39,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Menu.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeUseCase.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

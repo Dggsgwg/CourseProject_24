@@ -8,7 +8,7 @@ public:
 	Menu();
 	void start();
 	void loadFromFile();
-	void saveToFile();
+	void saveToFile(bool leave);
 	void operateWithTable();
 	int getCommand(int count);
 };

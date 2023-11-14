@@ -21,6 +21,8 @@ public:
 	void saveToFile(string fileName);
 	void readFromFile(string fileName);
 
+	string nodeToString(Node* node);
+
 private:
 	void getFiveEldest(Node** array, bool isMale);
 	void printHeader();
@@ -34,7 +36,6 @@ private:
 	string recordToString(Record record);
 	string recordToFileString(Record record);
 	
-	string nodeToString(Node* node);
 	string nodeToFileString(Node* node);
 };
 
