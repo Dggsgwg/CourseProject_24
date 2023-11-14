@@ -26,5 +26,15 @@ private:
 	void printHeader();
 	void printBottom();
 	bool displayPage(Node* showList, int rows, int page);
+
+	int compareDate(Date date, Date date2);
+	string dateToString(Date date);
+	string dateToFileString(Date date);
+
+	string recordToString(Record record);
+	string recordToFileString(Record record);
+	
+	string nodeToString(Node* node);
+	string nodeToFileString(Node* node);
 };
 

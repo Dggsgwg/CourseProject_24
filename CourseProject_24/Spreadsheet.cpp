@@ -51,6 +51,58 @@ void Spreadsheet::printBottom()
 	cout << "+-------------+------------+---------------------+---------+-------------+------------+------------------+-----------+" << endl;
 }
 
+int Spreadsheet::compareDate(Date date, Date date2) 
+{
+	if (date.year > date2.year) return  1;
+	else if (date.year < date2.year) return -1;
+	if (date.month > date2.month) return 1;
+	else if (date.month < date2.month) return -1;
+	if (date.day > date2.day) return 1;
+	else if (date.day < date2.day) return -1;
+	else return 0;
+}
+
+string Spreadsheet::dateToString(Date date) 
+{
+	return format("{:02}.{:02}.{}", date.day, date.month, date.year);
+}
+
+string Spreadsheet::dateToFileString(Date date) 
+{
+	return format("{} {} {}", date.day, date.month, date.year);
+}
+
+bool operator > (const Record& record, const Record& record2) 
+{
+	return strcmp(record.groupCode.c_str(), record2.groupCode.c_str()) > 0;
+}
+
+string Spreadsheet::recordToString(Record record) 
+{
+	return format("|   {:<9} | {:<10} | {:<19} | {:<7} |   {:<9} | {:<10} |    {:<13} |    {:<6} |",
+		record.groupCode, record.personalId, record.name, record.isMale ? "Ì" : "Æ",
+		record.educationForm, dateToString(record.birthdayDate),
+		dateToString(record.entranceDate), record.EGEPoints);
+}
+
+string Spreadsheet::recordToFileString(Record record) 
+{
+	return format("{} {} {} {} {} {} {} {}",
+		record.groupCode, record.personalId, record.name, record.isMale ? "Ì" : "Æ",
+		record.educationForm, dateToFileString(record.birthdayDate),
+		dateToFileString(record.entranceDate), record.EGEPoints);
+}
+
+string Spreadsheet::nodeToString(Node* node)
+{
+	return recordToString(node->record);
+}
+
+string Spreadsheet::nodeToFileString(Node* node)
+{
+	return recordToFileString(node->record);
+}
+
 void cursor(int size) {
 	bool exit = false;
 	int ch;

@@ -15,13 +15,13 @@ struct Record
 	Date entranceDate; //дата поступлени€
 	int EGEPoints; //баллы ≈√Ё
 
-	Record();
+	/*Record();
 	Record(string _groupCode, int _personalId, string _name, bool _isMale, 
 		string _educationForm, Date _birthdayDate, Date _entranceDate, int _EGEPoints);
 
 	bool operator > (const Record& record);
 
 	string toString();
-	string toFileString();
+	string toFileString();*/
 };
 
