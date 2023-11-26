@@ -8,4 +8,3 @@ struct Date
 	short month;
 	short day;
 };
-
