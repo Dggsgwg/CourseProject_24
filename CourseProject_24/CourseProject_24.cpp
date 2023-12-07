@@ -858,6 +858,7 @@ void saveToFile(bool leave)
 
 void loadFromFile()
 {
+	s.list = NULL;
 	string fileName;
 
 	cout << "Введите полное имя файла для открытия" << endl;
@@ -871,6 +872,7 @@ void startMenu()
 {
 	int command;
 	string tableName;
+	string filename;
 
 	do
 	{
@@ -892,7 +894,24 @@ void startMenu()
 			loadFromFile();
 			break;
 		case 2:
-			saveToFile(false);
+			cout << "Введите имя файла для сохранения" << endl;
+			cin >> fileName;
+
+			command = positionPicker(3, menuSizes[3], "");
+			saveToFile(fileName, (command == 0) ? "bin" : "sheet");
+
+			system("cls");
+			command = positionPicker(1, menuSizes[1], "");
+
+			switch (command)
+			{
+			case 1:
+				operateWithTable();
+				break;
+			case 0:
+				exit(0);
+			}
+
 			break;
 		case 3:
 			while (command != -1) {
