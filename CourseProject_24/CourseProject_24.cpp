@@ -10,6 +10,7 @@
 using namespace std;
 
 Spreadsheet s;
+const int* menuSizes = new int[] { 4, 2, 8, 2, 2, 8 };
 
 //SREADSHEET
 istream& operator >> (istream& in, Record& r)
@@ -63,6 +64,11 @@ bool operator > (const Record& record, const Record& record2)
 	return strcmp(record.groupCode.c_str(), record2.groupCode.c_str()) > 0;
 }
 
+bool operator < (const Record& record, const Record& record2)
+{
+	return strcmp(record.groupCode.c_str(), record2.groupCode.c_str()) < 0;
+}
+
 string recordToString(Record record)
 {
 	return format("|   {:<9} | {:<10} | {:<19} |  {:<1}  |   {:<9} | {:<10} |    {:<13} |    {:<6} |",
@@ -73,6 +79,7 @@ string recordToString(Record record)
 
 string recordToFileString(Record record)
 {
+	cout << record.name.size() << endl;
 	return format("{} {} {} {} {} {} {} {}",
 		record.groupCode, record.personalId, record.name, record.isMale ? "М" : "Ж",
 		record.educationForm, dateToFileString(record.birthdayDate),
@@ -86,7 +93,8 @@ string nodeToString(Node* node)
 
 string nodeToFileString(Node* node)
 {
-	return recordToFileString(node->record);
+	string r = recordToFileString(node->record);
+	return r;
 }
 
 bool displayPage(Node* showList, int rows, int page) {
@@ -223,7 +231,7 @@ bool removeRecord(int personalId)
 	return false;
 }
 
-bool editRecord(int personalId, Record record)
+bool editRecord(int personalId, int fieldNum, string value)
 {
 	Node* head = s.list;
 
@@ -232,7 +240,71 @@ bool editRecord(int personalId, Record record)
 		while (head) {
 			if (head->record.personalId == personalId)
 			{
-				head->record = record;
+				Record r = head->record;
+				switch (fieldNum) {
+					case 0:
+					{
+						r.groupCode = value;
+						break;
+					}
+					case 1: 
+					{
+						try {
+							r.personalId = stoi(value);
+						}
+						catch (...) {}
+						break;
+					}
+					case 2:
+					{
+						r.name = value;
+						break;
+					}
+					case 3:
+					{
+						r.isMale = (value == "М") ? true : false;
+						break;
+					}
+					case 4:
+					{
+						r.educationForm = value;
+						break;
+					}
+					case 5:
+					{
+						int index = value.find_first_of(".");
+						short day = stoi(value.substr(0, index));
+						value = value.substr(index + 1, value.size());
+						index = value.find_first_of(".");
+						short month = stoi(value.substr(0, index));
+						value = value.substr(index + 1, value.size());
+						short year = stoi(value);
+						r.birthdayDate = Date{year, month, day};
+						break;
+					}
+					case 6:
+					{
+						int index = value.find_first_of(".");
+						short day = stoi(value.substr(0, index));
+						value = value.substr(index + 1, value.size());
+						index = value.find_first_of(".");
+						short month = stoi(value.substr(0, index));
+						value = value.substr(index + 1, value.size());
+						short year = stoi(value);
+						r.entranceDate = Date{ year, month, day };
+						break;
+					}
+					case 7:
+					{
+						try {
+							r.EGEPoints = stoi(value);
+						}
+						catch (...) {}
+						break;
+					}
+				}
+				
+				head->record = r;
 
 				head = nullptr;
 				return true;
@@ -246,7 +318,7 @@ bool editRecord(int personalId, Record record)
 	return false;
 }
 
-void sort() //пузырьковая сортировка
+void sortAsc() //пузырьковая сортировка
 {
 	Node* t, * m, * a, * b;
 	if (s.list == NULL) return;
@@ -258,6 +330,38 @@ void sort() //пузырьковая сортировка
 
 		while (b != NULL) {
 			if (a->record > b->record) {
+				if (t == a)
+					s.list = b;
+				else
+					t->next = b;
+
+				a->next = b->next;
+				b->next = a;
+
+				m = a, a = b, b = m;
+				go = true;
+			}
+			t = a;
+			a = a->next;
+			b = b->next;
+		}
+	}
+
+	t = m = a = b = nullptr;
+}
+
+void sortDesc() //пузырьковая сортировка
+{
+	Node* t, * m, * a, * b;
+	if (s.list == NULL) return;
+
+	for (bool go = true; go; ) {
+		go = false;
+		a = t = s.list;
+		b = s.list->next;
+
+		while (b != NULL) {
+			if (a->record < b->record) {
 				if (t == a)
 					s.list = b;
 				else
@@ -361,10 +465,10 @@ void getFiveEldest()
 	males = females = nullptr;
 }
 
-void saveToFile(string fileName)
+void saveToFile(string fileName, string extension)
 {
 	ofstream out;
-	out.open(format("{}.bin", fileName));
+	out.open(format("{}.{}", fileName, extension));
 	Node* head = s.list;
 
 	if (out.is_open())
@@ -381,8 +485,9 @@ void saveToFile(string fileName)
 
 void readFromFile(string fileName)
 {
-	s.tableName = fileName;
-	ifstream in(format("{}.bin", fileName));
+	int index = fileName.find_first_of(".");
+	s.tableName = fileName.substr(0,index);
+	ifstream in(fileName);
 	Record r = Record();
 
 	if (in.is_open())
@@ -395,69 +500,237 @@ void readFromFile(string fileName)
 } //SPREADSHEET END
 
 //MENU
-void printMenu(int num)
+void printMenu(int num, int position)
 {
+	const int size = menuSizes[num];
+	const string* first = new string[]{
+		"Создание новой таблицы",
+		"Загрузка таблицы из файла",
+		"Сохранение текущей таблицы в файл",
+		"Выход из программы"
+	};
+	const string* second = new string[]{
+		"Выход из программы",
+		"Продолжить работу с таблицей"
+	};
+	const string* third = new string[]{
+		"Вернуться в главное меню",
+		"Просмотр таблицы",
+		"Добавить запись",
+		"Удалить запись",
+		"Изменить запись",
+		"Сортировать таблицу",
+		"Найти запись",
+		"Получить 5 старших юношей и девушек"
+	};
+	const string* fourth = new string[]{
+		"Сохранить в файл формата *.bin",
+		"Сохранить в файл формата *.sheet"
+	};
+	const string* fifth = new string[]{
+		"Сортировка по возрастанию",
+		"Сортировка по убыванию"
+	};
+	const string* sixth = new string[]{
+		"Шифр группы",
+		"Номер зачетной книжки",
+		"ФИО",
+		"Пол (М/Ж)",
+		"Форма обучения",
+		"Дата рождения",
+		"Дата поступления",
+		"Баллы ЕГЭ"
+	};
+
 	switch (num)
 	{
+	case 0:
+		cout << "Список команд:" << endl;
+		for (int i = 0; i < size; i++) {
+			if (i == position) {
+				cout << "-> ";
+			}
+			cout << first[i] << endl;
+		}
+		break;
 	case 1:
-		cout << "Список команд:" << endl
-			<< "1 - Создание новой таблицы" << endl
-			<< "2 - Загрузка таблицы из файла" << endl
-			<< "3 - Сохранение текущей таблицы в файл" << endl
-			<< "0 - Выход из программы" << endl;
+		cout << "Список команд:" << endl;
+			for (int i = 0; i < size; i++) {
+				if (i == position) {
+					cout << "-> ";
+				}
+				cout << second[i] << endl;
+			}
 		break;
 	case 2:
-		cout << "Список команд:" << endl
-			<< "1 - Продолжить работу с таблицей" << endl
-			<< "0 - Выход из программы" << endl;
+		cout << "Список команд:" << endl;
+		for (int i = 0; i < size; i++) {
+			if (i == position) {
+				cout << "-> ";
+			}
+			cout << third[i] << endl;
+		}
 		break;
 	case 3:
-		cout << "Список команд:" << endl
-			<< "1 - Просмотр таблицы" << endl
-			<< "2 - Добавить запись" << endl
-			<< "3 - Удалить запись" << endl
-			<< "4 - Изменить запись" << endl
-			<< "5 - Сортировать таблицу" << endl
-			<< "6 - Найти запись" << endl
-			<< "7 - Получить 5 старших юношей и девушек" << endl
-			<< "0 - Вернуться в главное меню" << endl;
+		cout << "Список команд:" << endl;
+		for (int i = 0; i < size; i++) {
+			if (i == position) {
+				cout << "-> ";
+			}
+			cout << fourth[i] << endl;
+		}
+		break;
+	case 4:
+		cout << "Список команд:" << endl;
+		for (int i = 0; i < size; i++) {
+			if (i == position) {
+				cout << "-> ";
+			}
+			cout << fifth[i] << endl;
+		}
+		break;
+	case 5:
+		cout << "Выберите поле для изменения:" << endl;
+		for (int i = 0; i < size; i++) {
+			if (i == position) {
+				cout << "-> ";
+			}
+			cout << sixth[i] << endl;
+		}
 		break;
 	}
+	
 }
 
-int getCommand(int count)
-{
-	int variant;
-	string s; // строка для считывания введённых данных
-	getline(cin, s); // считываем строку
-	while (s.empty())
+//int getCommand(int count)
+//{
+//	int variant;
+//	string s; // строка для считывания введённых данных
+//	getline(cin, s); // считываем строку
+//	while (s.empty())
+//	{
+//		getline(cin, s);
+//	}
+//
+//	// пока ввод некорректен, сообщаем об этом и просим повторить его
+//	while (sscanf(s.c_str(), "%d", &variant) != 1 || variant < 0 || variant > count) {
+//		cout << "Неправильный код: " << endl; // выводим сообщение об ошибке
+//		getline(cin, s); // считываем строку повторно
+//	}
+//
+//	return variant;
+//}
+
+int positionPicker(int menuId, int menuSize, string defaultText) {
+	int position = 0;
+	int ch;
+	bool exit = false;
+	system("cls");
+	if (defaultText != "") {
+		printHeader();
+		cout << defaultText << endl;
+		printBottom();
+	}
+	printMenu(menuId, position);
+
+	while (!exit)
 	{
-		getline(cin, s);
+		ch = _getch();
+		switch (ch)
+		{
+		case 224:
+		{
+			switch (_getch())
+			{
+			case 72:
+			{// нажата клавиша вверх
+				if (position > 0) {
+					position -= 1;
+					system("cls");
+					if (defaultText != "") {
+						printHeader();
+						cout << defaultText << endl;
+						printBottom();
+					}
+					printMenu(menuId, position);
+				}
+				break;
+			}
+			case 75:
+			{// нажата клавиша влево
+				if (position > 0) {
+					position -= 1;
+					system("cls");
+					if (defaultText != "") {
+						printHeader();
+						cout << defaultText << endl;
+						printBottom();
+					}
+					printMenu(menuId, position);
+				}
+				break;
+			}
+			case 80:
+			{// нажата клавиша вниз
+				if (position < menuSize - 1) {
+					position += 1;
+					system("cls");
+					if (defaultText != "") {
+						printHeader();
+						cout << defaultText << endl;
+						printBottom();
+					}
+					printMenu(menuId, position);
+				}
+				break;
+			}
+			case 77:
+			{// нажата клавиша вправо
+				if (position < menuSize - 1) {
+					position += 1;
+					system("cls");
+					if (defaultText != "") {
+						printHeader();
+						cout << defaultText << endl;
+						printBottom();
+					}
+					printMenu(menuId, position);
+				}
+				break;
+			}
+			default:
+				break;
+			}
+			break;
+		}
+		case 13:
+		{
+			exit = true;
+			break;
+		}
+		default:
+			break;
+		}
 	}
 
-	// пока ввод некорректен, сообщаем об этом и просим повторить его
-	while (sscanf(s.c_str(), "%d", &variant) != 1 || variant < 0 || variant > count) {
-		cout << "Неправильный код: " << endl; // выводим сообщение об ошибке
-		getline(cin, s); // считываем строку повторно
-	}
-
-	return variant;
+	return position;
 }
 
 void operateWithTable()
 {
-	int command, numLine;
+	int command, numLine, pos;
 	string line;
 	Node* n = NULL;
 	bool skip = false;
+	int isAsc = -1;
 
 	do
 	{
 		system("cls");
 
-		printMenu(3);
-
-		command = getCommand(7);
+		command = positionPicker(2, menuSizes[2], "");
+		//printMenu(3, 0);
+		//command = getCommand(7);
 
 		switch (command)
 		{
@@ -483,14 +756,38 @@ void operateWithTable()
 		case 4:
 			cout << "Введите номер зачетки для изменения записи:" << endl;
 			cin >> numLine;
-			cout << "Введите новые данные записи в формате:" << endl
-				<< "ИТ22-6 123456 Балабанов В Е true очная 1 1 2008 1 1 2021 250" << endl;
-			editRecord(numLine, getRecordFromStream(cin));
+			//cout << "Введите новые данные записи в формате:" << endl
+			//	<< "ИТ22-6 123456 Балабанов В Е true очная 1 1 2008 1 1 2021 250" << endl;
+			system("cls");	
+			n = seek(numLine);
+			if (n != NULL)
+			{
+				line = nodeToString(n);
+			}
+			else
+			{
+				cout << "Запись не найдена" << endl;
+				break;
+			}
+			pos = positionPicker(5, menuSizes[5], line);
+
+			cout << "Введите новое значение поля:" << endl;
+			cin.seekg(cin.eof());
+			getline(cin, line);
+
+			editRecord(numLine, pos, line);
 			display();
 			skip = true;
 			break;
 		case 5:
-			sort();
+			isAsc = positionPicker(4, menuSizes[4], "");
+			if (isAsc == 0)
+			{
+				sortAsc();
+			}
+			else {
+				sortDesc();
+			}
 			display();
 			skip = true;
 			break;
@@ -500,8 +797,10 @@ void operateWithTable()
 			n = seek(numLine);
 			if (n != NULL)
 			{
-				cout << "Искомая запись:" << endl
-					<< nodeToString(n) << endl;
+				cout << "Искомая запись:" << endl;
+				printHeader();
+				cout << nodeToString(n) << endl;
+				printBottom();
 			}
 			else
 			{
@@ -524,7 +823,6 @@ void operateWithTable()
 		}
 	} while (command != 0);
 
-	delete n;
 	n = nullptr;
 }
 
@@ -536,15 +834,16 @@ void saveToFile(bool leave)
 	cout << "Введите имя файла для сохранения" << endl;
 	cin >> fileName;
 
-	saveToFile(fileName);
+	command = positionPicker(3, menuSizes[3], "");
+	saveToFile(fileName, (command == 0) ? "bin" : "sheet");
 
 	if (!leave) {
 		do
 		{
 			system("cls");
-			printMenu(2);
-
-			command = getCommand(1);
+			command = positionPicker(1, menuSizes[1], "");
+			//printMenu(2, 0);
+			//command = getCommand(1);
 
 			switch (command)
 			{
@@ -561,7 +860,7 @@ void loadFromFile()
 {
 	string fileName;
 
-	cout << "Введите имя файла для открытия" << endl;
+	cout << "Введите полное имя файла для открытия" << endl;
 	cin >> fileName;
 
 	readFromFile(fileName);
@@ -576,27 +875,26 @@ void startMenu()
 	do
 	{
 		system("cls");
-
-		printMenu(1);
-
-		command = getCommand(3);
+		command = positionPicker(0, menuSizes[0], "");
+		//printMenu(1, 0);
+		//command = getCommand(3);
 
 		switch (command)
 		{
-		case 1:
+		case 0:
 			cout << "Введите название таблицы:" << endl;
 			cin >> tableName;
 
 			s = Spreadsheet(tableName);
 			operateWithTable();
 			break;
-		case 2:
+		case 1:
 			loadFromFile();
 			break;
-		case 3:
+		case 2:
 			saveToFile(false);
 			break;
-		case 0:
+		case 3:
 			while (command != -1) {
 				cout << "Сохранить таблицу в файл? (y/n)" << endl;
 				char ch = _getch();
