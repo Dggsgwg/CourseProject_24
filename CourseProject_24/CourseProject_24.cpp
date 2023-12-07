@@ -79,7 +79,6 @@ string recordToString(Record record)
 
 string recordToFileString(Record record)
 {
-	cout << record.name.size() << endl;
 	return format("{} {} {} {} {} {} {} {}",
 		record.groupCode, record.personalId, record.name, record.isMale ? "М" : "Ж",
 		record.educationForm, dateToFileString(record.birthdayDate),
@@ -93,8 +92,7 @@ string nodeToString(Node* node)
 
 string nodeToFileString(Node* node)
 {
-	string r = recordToFileString(node->record);
-	return r;
+	return recordToFileString(node->record);
 }
 
 bool displayPage(Node* showList, int rows, int page) {
@@ -872,7 +870,7 @@ void startMenu()
 {
 	int command;
 	string tableName;
-	string filename;
+	string fileName;
 
 	do
 	{
